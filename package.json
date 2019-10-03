@@ -1,6 +1,6 @@
 {
   "name": "uninet-address",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Uninet Address",
   "main": "index.js",
   "repository": "https://github.com/zaoqi/uninet-address",
