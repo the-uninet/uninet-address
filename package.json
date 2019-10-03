@@ -12,5 +12,8 @@
   "devDependencies": {
     "randomstring": "^1.1.5",
     "tape": "^4.11.0"
+  },
+  "scripts": {
+    "test": "node test.js"
   }
 }

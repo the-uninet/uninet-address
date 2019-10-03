@@ -24,3 +24,12 @@ test('send/receive', t => {
     })
   })
 })
+
+test('signature/un_signature', t => {
+  t.plan(5*100)
+  gen(()=>mod.create(), 5).map(([address, key]) => {
+    gen_str(100).map(msg => {
+      t.equal(mod.un_signature(address, mod.signature(key, Buffer.from(msg))).toString(), msg)
+    })
+  })
+})
