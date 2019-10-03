@@ -1,34 +1,48 @@
-const NodeRSA = require('node-rsa')
+const crypto = require('crypto')
 
-function create(bits = 1024) {
-  const key = new NodeRSA({b: bits})
-  const private = key.exportKey('pkcs8-private-der')
-  const public = key.exportKey('pkcs8-public-der')
-  return [public, private]
+async function createAsync(bits = 4096) {
+  const {privateKey, publicKey} = await new Promise((resolve, reject)=>
+    crypto.generateKeyPair('rsa',
+      {modulusLength:bits,
+        publicKeyEncoding:{type:'pkcs1',format:'pem'},
+        privateKeyEncoding:{type:'pkcs1',format:'pem'}},
+      (err,publicKey,privateKey)=>
+        err==null?resolve({privateKey:privateKey,publicKey:publicKey}):reject(err)))
+  const address = publicKey
+  const key = privateKey
+  return [address, key]
 }
 
-function send(pub, message) {
-  const public = new NodeRSA(pub, 'pkcs8-public-der')
-  return public.encrypt(message)
+function createSync(bits = 4096) {
+  const {privateKey, publicKey} =
+    crypto.generateKeyPairSync('rsa',
+      {modulusLength:bits,
+        publicKeyEncoding:{type:'pkcs1',format:'pem'},
+        privateKeyEncoding:{type:'pkcs1',format:'pem'}})
+  const address = publicKey
+  const key = privateKey
+  return [address, key]
 }
 
-function receive(pri, message) {
-  const private = new NodeRSA(pri, 'pkcs8-private-der')
-  return private.decrypt(message)
+function send(address, message) {
+  return Uint8Array.from(crypto.publicEncrypt(address, message))
 }
 
-function signature(pri, message) {
-  const private = new NodeRSA(pri, 'pkcs8-private-der')
-  return private.encryptPrivate(message)
+function receive(key, message) {
+  return Uint8Array.from(crypto.privateDecrypt(key, message))
 }
 
-function un_signature(pub, message) {
-  const public = new NodeRSA(pub, 'pkcs8-public-der')
-  return public.decryptPublic(message)
+function signature(key, message) {
+  return Uint8Array.from(crypto.privateEncrypt(key, message))
+}
+
+function un_signature(address, message) {
+  return Uint8Array.from(crypto.publicDecrypt(address, message))
 }
 
 module.exports = {
-  create: create,
+  create: createSync,
+  createAsync: createAsync,
   send: send,
   receive: receive,
   signature: signature,
